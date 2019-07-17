@@ -22,13 +22,13 @@ target_include_directories(boringssl_gtest PRIVATE 3rd/googletest)
 
 # SIKE/p434 library
 add_library(
-  sike434
+  sike434sha256
 
-  src/p434/fpx.c
-  src/p434/isogeny.c
-  src/p434/params.c
-  src/p434/sike.c
-  src/p434/asm/fp_generic.c
+  src/sike-p434-sha256/fpx.c
+  src/sike-p434-sha256/isogeny.c
+  src/sike-p434-sha256/params.c
+  src/sike-p434-sha256/sike.c
+  src/sike-p434-sha256/asm/fp_generic.c
 
   3rd/random/randombytes.c
   3rd/sha2/sha256.c
@@ -44,11 +44,11 @@ add_executable(
 )
 
 include_directories(
-  src/p434
+  src/sike-p434-sha256
 )
 
 target_link_libraries(
     test
-    sike434
+    sike434sha256
     boringssl_gtest
     pthread)
