@@ -65,15 +65,15 @@
 do {                                                                        \
   crypto_word_t tempReg = (addend1) + (crypto_word_t)(carryIn);             \
   (sumOut) = (addend2) + tempReg;                                           \
-  (carryOut) = M2B(ct_uint_le(tempReg, (crypto_word_t)(carryIn)) |  \
-                   ct_uint_le((sumOut), tempReg));                  \
+  (carryOut) = M2B(ct_uint_lt(tempReg, (crypto_word_t)(carryIn)) |  \
+                   ct_uint_lt((sumOut), tempReg));                  \
 } while(0)
 
 // Digit subtraction with borrow
 #define SUBC(borrowIn, minuend, subtrahend, borrowOut, differenceOut)           \
 do {                                                                            \
     crypto_word_t tempReg = (minuend) - (subtrahend);                           \
-    crypto_word_t borrowReg = M2B(ct_uint_le((minuend), (subtrahend))); \
+    crypto_word_t borrowReg = M2B(ct_uint_lt((minuend), (subtrahend))); \
     borrowReg |= ((borrowIn) & ct_uint_eq(tempReg, 0));               \
     (differenceOut) = tempReg - (crypto_word_t)(borrowIn);                      \
     (borrowOut) = borrowReg;                                                    \
@@ -153,31 +153,79 @@ static inline crypto_word_t ct_uint_eq(crypto_word_t x, crypto_word_t y)
     // return MSB - 1 in case x==y, otherwise 0
     return ((~t) >> (RADIX-1));
 }
-
-// Returns 1 if x<y, otherwise 0
-static inline crypto_word_t ct_uint_le(crypto_word_t x, crypto_word_t y)
-{
-  const crypto_word_t t1 = x^y;
-  const crypto_word_t t2 = x - y;
-  const crypto_word_t tt = x ^ (t1 | (t2^y));
-  return (tt >> (RADIX-1));
-}
-
 // Constant time select.
 // if pick == 1 (out = in1)
 // if pick == 0 (out = in2)
 // else out is undefined
 static inline uint8_t ct_select_8(uint8_t flag, uint8_t in1, uint8_t in2) {
-    uint8_t mask = (((int8_t)flag) << 7)>>7;
+    uint8_t mask = ((int8_t)(flag << 7))>>7;
     return (in1&mask) | (in2&(~mask));
 }
 
+// Constant time memcmp. Returns 1 if p==q, otherwise 0
 static inline int ct_mem_eq(const void *p, const void *q, size_t n)
 {
-  const uint8_t *pp = p, *qq = q;
+  const uint8_t *pp = (uint8_t*)p, *qq = (uint8_t*)q;
   uint8_t a = 0;
 
   while (n--) a |= *pp++ ^ *qq++;
   return (ct_uint_eq(a, 0));
+}
+
+/*
+// Returns 1 if x<y, otherwise 0
+static inline crypto_word_t ct_uint_lt(crypto_word_t x, crypto_word_t y) {
+  const crypto_word_t t1 = x^y;
+  const crypto_word_t t2 = x - y;
+  const crypto_word_t tt = x ^ (t1 | (t2^y));
+  return (tt >> (RADIX-1));
+}
+*/
+
+/// OZAPTF: coppied from boringssl
+static inline crypto_word_t constant_time_msb_w(crypto_word_t a) {
+  return 0u - (a >> (sizeof(a) * 8 - 1));
+}
+
+// constant_time_lt_w returns 0xff..f if a < b and 0 otherwise.
+static inline crypto_word_t ct_uint_lt(crypto_word_t x, crypto_word_t y)
+{
+  /*
+  const crypto_word_t t1 = x^y;
+  const crypto_word_t t2 = x - y;
+  const crypto_word_t tt = x ^ (t1 | (t2^y));
+  return (tt >> (RADIX-1));
+  */
+  // Consider the two cases of the problem:
+  //   msb(a) == msb(b): a < b iff the MSB of a - b is set.
+  //   msb(a) != msb(b): a < b iff the MSB of b is set.
+  //
+  // If msb(a) == msb(b) then the following evaluates as:
+  //   msb(a^((a^b)|((a-b)^a))) ==
+  //   msb(a^((a-b) ^ a))       ==   (because msb(a^b) == 0)
+  //   msb(a^a^(a-b))           ==   (rearranging)
+  //   msb(a-b)                      (because ∀x. x^x == 0)
+  //
+  // Else, if msb(a) != msb(b) then the following evaluates as:
+  //   msb(a^((a^b)|((a-b)^a))) ==
+  //   msb(a^(𝟙 | ((a-b)^a)))   ==   (because msb(a^b) == 1 and 𝟙
+  //                                  represents a value s.t. msb(𝟙) = 1)
+  //   msb(a^𝟙)                 ==   (because ORing with 1 results in 1)
+  //   msb(b)
+  //
+  //
+  // Here is an SMT-LIB verification of this formula:
+  //
+  // (define-fun lt ((a (_ BitVec 32)) (b (_ BitVec 32))) (_ BitVec 32)
+  //   (bvxor a (bvor (bvxor a b) (bvxor (bvsub a b) a)))
+  // )
+  //
+  // (declare-fun a () (_ BitVec 32))
+  // (declare-fun b () (_ BitVec 32))
+  //
+  // (assert (not (= (= #x00000001 (bvlshr (lt a b) #x0000001f)) (bvult a b))))
+  // (check-sat)
+  // (get-model)
+  return constant_time_msb_w(x^((x^y)|((x-y)^x)));
 }
 #endif // UTILS_H_

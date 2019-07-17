@@ -7,7 +7,7 @@ enable_language(C)
 enable_language(CXX)
 
 # Temporary flags for SIKE
-set(CMAKE_C_FLAGS "-DARCH_NO_ASM -DCPU_64_BIT -DHAS_UINT128")
+set(CMAKE_C_FLAGS "-DARCH_NO_ASM -DCPU_64_BIT -DHAS_UINT128 -g")
 
 # Common include directories
 include_directories(
@@ -41,6 +41,10 @@ add_executable(
 
   test/p434.cc
   3rd/googletest/src/gtest_main.cc
+)
+
+include_directories(
+  src/p434
 )
 
 target_link_libraries(

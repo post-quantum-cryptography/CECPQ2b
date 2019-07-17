@@ -16,6 +16,7 @@
 
 #include <gtest/gtest.h>
 #include <sike/sike.h>
+#include "utils.h"
 
 TEST(SIKE, RoundTrip) {
     uint8_t sk[SIKE_PRV_BYTESZ] = {0};
@@ -24,7 +25,7 @@ TEST(SIKE, RoundTrip) {
     uint8_t ss_enc[SIKE_SS_BYTESZ] = {0};
     uint8_t ss_dec[SIKE_SS_BYTESZ] = {0};
 
-    for (size_t i=0; i<30; i++) {
+    for (size_t i=0; i<3; i++) {
         EXPECT_EQ(SIKE_keypair(sk, pk), 1);
         SIKE_encaps(ss_enc, ct, pk);
         SIKE_decaps(ss_dec, ct, pk, sk);
@@ -192,4 +193,38 @@ TEST(SIKE, Unaligned) {
   SIKE_decaps(shared_key2 + 1, ciphertext + 1, pub + 1, priv + 1);
 
   EXPECT_EQ(memcmp(shared_key1 + 1, shared_key2 + 1, SIKE_SS_BYTESZ), 0);
+}
+
+TEST(SIKE, CT_FUNCTIONS) {
+    // ct_uint_eq
+    EXPECT_EQ(ct_uint_eq(0,1), 0);
+    EXPECT_EQ(ct_uint_eq(1,1), 1);
+    EXPECT_EQ(ct_uint_eq(0xFF,0xFF), 1);
+    EXPECT_EQ(ct_uint_eq(0xFE,0xFF), 0);
+    EXPECT_EQ(ct_uint_eq(0,1), 0);
+    EXPECT_EQ(ct_uint_eq(0,0), 1);
+
+    // ct_uint_le
+    EXPECT_EQ(ct_uint_lt(1,1), 0);
+    EXPECT_EQ(ct_uint_lt(1,0), 0);
+    EXPECT_EQ(ct_uint_lt(0,1), 0xFFFFFFFF);
+    EXPECT_EQ(ct_uint_lt(0xFF,0xFE), 0);
+    EXPECT_EQ(ct_uint_lt(0xFE,0xFF), 0xFFFFFFFF);
+    EXPECT_EQ(ct_uint_lt(0xFF,0xFF), 0);
+
+    // ct_select_8
+    EXPECT_EQ(ct_select_8(1,0,1), 0);
+    EXPECT_EQ(ct_select_8(1,2,3), 2);
+    EXPECT_EQ(ct_select_8(0,2,3), 3);
+    EXPECT_EQ(ct_select_8(0,1,0xFE), 0xFE);
+    EXPECT_EQ(ct_select_8(1,1,0xFE), 1);
+
+    // ct_mem_eq
+    const char *t1 = "ABC";
+    const char *t2 = "DEF";
+    const char *t3 = "DEFG";
+
+    EXPECT_EQ(ct_mem_eq(t1, t1, 3), 1);
+    EXPECT_EQ(ct_mem_eq(t1, t2, 3), 0);
+    EXPECT_EQ(ct_mem_eq(t1, t3, 4), 0);
 }

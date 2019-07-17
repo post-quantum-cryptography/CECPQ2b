@@ -420,7 +420,6 @@ int SIKE_keypair(uint8_t out_priv[SIKE_PRV_BYTESZ],
   ret = 1;
 
 end:
-  // BN_free(bn_sidh_prv);
   return ret;
 }
 
@@ -428,9 +427,9 @@ void SIKE_encaps(uint8_t out_shared_key[SIKE_SS_BYTESZ],
                  uint8_t out_ciphertext[SIKE_CT_BYTESZ],
                  const uint8_t pub_key[SIKE_PUB_BYTESZ]) {
   // Secret buffer is reused by the function to store some ephemeral
-  // secret data. It's size must be maximum of SHA256_BLOCK_SIZE,
+  // secret data. It's size must be maximum of 64,
   // SIKE_MSG_BYTESZ and SIDH_PRV_A_BITSZ in bytes.
-  uint8_t secret[SHA256_BLOCK_SIZE];
+  uint8_t secret[32]; // OZAPTF, why?
   uint8_t j[SIDH_JINV_BYTESZ];
   uint8_t temp[SIKE_MSG_BYTESZ + SIKE_CT_BYTESZ];
   SHA256_CTX ctx;
@@ -474,9 +473,9 @@ void SIKE_decaps(uint8_t out_shared_key[SIKE_SS_BYTESZ],
                  const uint8_t pub_key[SIKE_PUB_BYTESZ],
                  const uint8_t priv_key[SIKE_PRV_BYTESZ]) {
   // Secret buffer is reused by the function to store some ephemeral
-  // secret data. It's size must be maximum of SHA256_BLOCK_SIZE,
+  // secret data. It's size must be maximum of 64,
   // SIKE_MSG_BYTESZ and SIDH_PRV_A_BITSZ in bytes.
-  uint8_t secret[SHA256_BLOCK_SIZE];
+  uint8_t secret[32];
   uint8_t j[SIDH_JINV_BYTESZ];
   uint8_t c0[SIKE_PUB_BYTESZ];
   uint8_t temp[SIKE_MSG_BYTESZ];
@@ -508,7 +507,7 @@ void SIKE_decaps(uint8_t out_shared_key[SIKE_SS_BYTESZ],
   // Recover c0 = public key A
   gen_iso_A(secret, c0);
   crypto_word_t ok = ct_uint_eq(
-    ct_mem_eq(c0, ciphertext, SIKE_PUB_BYTESZ), 0);
+    ct_mem_eq(c0, ciphertext, SIKE_PUB_BYTESZ), 1);
   for (size_t i = 0; i < SIKE_MSG_BYTESZ; i++) {
     temp[i] = ct_select_8(ok, temp[i], shared_nok[i]);
   }
