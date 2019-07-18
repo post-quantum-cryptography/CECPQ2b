@@ -5,6 +5,8 @@ This is an implementation of SIKE/p434 used for experimentation.
 
 # Performance results
 
+## SIKEp434-sha256
+
 ```
 | CPU                  | Operation     | P503 (ops/sec) | P434 (ops/sec) |
 |----------------------|---------------|----------------|----------------|
