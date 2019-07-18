@@ -10,7 +10,7 @@ if ($flavour =~ /\./) { $output = $flavour; undef $flavour; }
 
 $0 =~ m/(.*[\/\\])[^\/\\]+$/; $dir=$1;
 ( $xlate="${dir}arm-xlate.pl" and -f $xlate ) or
-( $xlate="${dir}../../../crypto/perlasm/arm-xlate.pl" and -f $xlate) or
+( $xlate="${dir}../../../3rd/boringssl/arm-xlate.pl" and -f $xlate) or
 die "can't locate arm-xlate.pl";
 
 open OUT,"| \"$^X\" \"$xlate\" $flavour \"$output\"";

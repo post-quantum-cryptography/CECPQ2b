@@ -10,7 +10,7 @@ if ($flavour =~ /\./) { $output = $flavour; undef $flavour; }
 
 $0 =~ m/(.*[\/\\])[^\/\\]+$/; $dir=$1;
 ( $xlate="${dir}x86_64-xlate.pl" and -f $xlate ) or
-( $xlate="${dir}../../../crypto/perlasm/x86_64-xlate.pl" and -f $xlate) or
+( $xlate="${dir}../../../3rd/boringssl/x86_64-xlate.pl" and -f $xlate) or
 die "can't locate x86_64-xlate.pl";
 
 open OUT,"| \"$^X\" \"$xlate\" $flavour \"$output\"";
