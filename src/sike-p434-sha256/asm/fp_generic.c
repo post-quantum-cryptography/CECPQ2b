@@ -4,7 +4,7 @@
 * Abstract: portable modular arithmetic for P503
 *********************************************************************************************/
 
-#if defined(ARCH_NO_ASM) || \
+#if defined(ARCH_GENERIC) || \
     (!defined(ARCH_X86_64) && !defined(ARCH_AARCH64))
 
 #include "../utils.h"

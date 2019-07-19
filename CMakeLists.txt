@@ -43,7 +43,7 @@ elseif(${ARCH} STREQUAL "x86_64")
   )
   set(CMAKE_C_FLAGS "-DARCH_X86_64 -DCPU_64_BIT -DHAS_UINT128")
 elseif(${ARCH} STREQUAL "generic")
-  set(CMAKE_C_FLAGS "-DARCH_NO_ASM")
+  set(CMAKE_C_FLAGS "-DARCH_GENERIC")
 else()
   message(FATAL_ERROR "Something got wrong for CPU:" ${CMAKE_SYSTEM_PROCESSOR})
 endif()
@@ -99,9 +99,9 @@ add_library(
   src/sike-p434-sha256/isogeny.c
   src/sike-p434-sha256/params.c
   src/sike-p434-sha256/sike.c
-  src/sike-p434-sha256/asm/fp_generic.c
   
   ${CRYPTO_ARCH_SOURCES}
+  src/sike-p434-sha256/asm/fp_generic.c
 
   3rd/random/randombytes.c
   3rd/sha2/sha256.c

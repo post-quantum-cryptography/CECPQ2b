@@ -30,7 +30,7 @@ extern const struct params_t params;
 
 // Swap points.
 // If option = 0 then P <- P and Q <- Q, else if option = 0xFF...FF then P <- Q and Q <- P
-#if !defined(ARCH_X86_64) || defined(ARCH_NO_ASM)
+#if !defined(ARCH_X86_64) || defined(ARCH_GENERIC)
 static void sike_cswap(point_proj_t P, point_proj_t Q, const crypto_word_t option)
 {
     crypto_word_t temp;
@@ -55,7 +55,7 @@ static void sike_cswap(point_proj_t P, point_proj_t Q, const crypto_word_t optio
 // If option = 0 then P <- P and Q <- Q, else if option = 0xFF...FF then P <- Q and Q <- P
 static inline void sike_fp2cswap(point_proj_t P, point_proj_t Q, const crypto_word_t option)
 {
-#if defined(ARCH_X86_64) && !defined(ARCH_NO_ASM)
+#if defined(ARCH_X86_64) && !defined(ARCH_GENERIC)
     sike_cswap_asm(P, Q, option);
 #else
     sike_cswap(P, Q, option);
