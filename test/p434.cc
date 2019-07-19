@@ -25,7 +25,7 @@ TEST(SIKE, RoundTrip) {
     uint8_t ss_enc[SIKE_SS_BYTESZ] = {0};
     uint8_t ss_dec[SIKE_SS_BYTESZ] = {0};
 
-    for (size_t i=0; i<3; i++) {
+    for (size_t i=0; i<300; i++) {
         EXPECT_EQ(SIKE_keypair(sk, pk), 1);
         SIKE_encaps(ss_enc, ct, pk);
         SIKE_decaps(ss_dec, ct, pk, sk);

@@ -1,7 +1,5 @@
 #! /usr/bin/env perl
 #
-# April 2019
-#
 # Abstract: field arithmetic in x64 assembly for SIDH/p434
 
 $flavour = shift;
@@ -38,25 +36,7 @@ $code.=<<___;
 .quad   0x6CFC5FD681C52056
 .quad   0x0002341F27177344
 
-.extern OPENSSL_ia32cap_P
-.hidden OPENSSL_ia32cap_P
 ___
-
-# Jump to alternative implemenatation provided as an
-# argument in case CPU supports ADOX/ADCX and MULX instructions.
-sub alt_impl {
-  $jmp_func = shift;
-
-  $body=<<___;
-  lea OPENSSL_ia32cap_P(%rip), %rcx
-  mov 8(%rcx), %rcx
-  and \$0x80100, %ecx
-  cmp \$0x80100, %ecx
-  je  $jmp_func
-
-___
-  return $body
-}
 
 # Performs schoolbook multiplication of 2 192-bit numbers. Uses
 # MULX instruction. Result is stored in 192 bits pointed by $DST.
@@ -861,7 +841,6 @@ ___
 # Operation: c [rsi] = a [rdi]
 # NOTE: a=c is not allowed
 sub sike_rdc {
-  my $jump_redc_bdw=&alt_impl(".Lrdc_bdw") if ($bmi2_adx);
   # a[0-1] x .Lp434p1 --> result: r8:r13
   my $mulx1=&mulx128x256( 0,"%rdi",".Lp434p1(%rip)",map("%r$_",(8..13)),"%rcx");
   # a[2-3] x .Lp434p1 --> result: r8:r13
@@ -880,40 +859,15 @@ sub sike_rdc {
   # a[6-7] x .Lp434p1 --> result: r8:r13
   my $mul4=&mul64x256( 48,"%rdi",".Lp434p1(%rip)",map("%r$_",(8..13)));
 
-  my $redc_mul=&redc_common($mul1, $mul2, $mul3, $mul4);
-  my $redc_bdw=&redc_common($mulx1, $mulx2, $mulx3, $mulx4) if ($bmi2_adx);
-
-  # REDC for Broadwell CPUs
-  my $code=<<___;
-    .Lrdc_bdw:
-    .cfi_startproc
-      # sike_fprdc has already pushed r12--15 by this point.
-    .cfi_adjust_cfa_offset 32
-    .cfi_offset r12, -16
-    .cfi_offset r13, -24
-    .cfi_offset r14, -32
-    .cfi_offset r15, -40
-
-    $redc_bdw
-
-      pop %r15
-    .cfi_adjust_cfa_offset -8
-    .cfi_same_value r15
-      pop %r14
-    .cfi_adjust_cfa_offset -8
-    .cfi_same_value r14
-      pop %r13
-    .cfi_adjust_cfa_offset -8
-    .cfi_same_value r13
-      pop %r12
-    .cfi_adjust_cfa_offset -8
-    .cfi_same_value r12
-      ret
-    .cfi_endproc
-___
+  my $redc;
+  if ($bmi2_adx==1) {
+    $redc=&redc_common($mulx1, $mulx2, $mulx3, $mulx4);
+  } else {
+    $redc=&redc_common($mul1, $mul2, $mul3, $mul4);
+  }
 
   # REDC for CPUs older than Broadwell
-  $code.=<<___;
+  my $code.=<<___;
     .globl  ${PREFIX}_fprdc
     .type   ${PREFIX}_fprdc,\@function,3
     ${PREFIX}_fprdc:
@@ -931,11 +885,7 @@ ___
     .cfi_adjust_cfa_offset  8
     .cfi_offset r15, -40
 
-      # Jump to optimized implementation if
-      # CPU supports ADCX/ADOX/MULX
-      $jump_redc_bdw
-      # Otherwise use generic implementation
-      $redc_mul
+      $redc
 
       pop %r15
     .cfi_adjust_cfa_offset -8
@@ -1545,39 +1495,16 @@ ___
 #  Operation: c [rdx] = a [rdi] * b [rsi]
 #  NOTE: a=c or b=c are not allowed
 sub sike_mul {
-  my $jump_mul_bdw=&alt_impl(".Lmul_bdw") if ($bmi2_adx);
-  # MUL for Broadwell CPUs
-  my $mul_bdw=&mul_bdw() if ($bmi2_adx);
-  # MUL for CPUs older than Broadwell
-  my $mul=&mul();
+  my $mul;
+  if($bmi2_adx == 1) {
+    # MUL for Broadwell CPUs
+    $mul=&mul_bdw();
+  } else {
+    # MUL for CPUs older than Broadwell
+    $mul=&mul();
+  }
 
   my $body=<<___;
-  .Lmul_bdw:
-  .cfi_startproc
-    # sike_mpmul has already pushed r12--15 by this point.
-  .cfi_adjust_cfa_offset 32
-  .cfi_offset r12, -16
-  .cfi_offset r13, -24
-  .cfi_offset r14, -32
-  .cfi_offset r15, -40
-
-    $mul_bdw
-
-    pop %r15
-  .cfi_adjust_cfa_offset -8
-  .cfi_same_value r15
-    pop %r14
-  .cfi_adjust_cfa_offset -8
-  .cfi_same_value r14
-    pop %r13
-  .cfi_adjust_cfa_offset -8
-  .cfi_same_value r13
-    pop %r12
-  .cfi_adjust_cfa_offset -8
-  .cfi_same_value r12
-      ret
-  .cfi_endproc
-
   .globl  ${PREFIX}_mpmul
   .type   ${PREFIX}_mpmul,\@function,3
   ${PREFIX}_mpmul:
@@ -1595,10 +1522,6 @@ sub sike_mul {
   .cfi_adjust_cfa_offset 8
   .cfi_offset r15, -40
 
-    # Jump to optimized implementation if
-    # CPU supports ADCX/ADOX/MULX
-    $jump_mul_bdw
-    # Otherwise use generic implementation
     $mul
 
     pop %r15
