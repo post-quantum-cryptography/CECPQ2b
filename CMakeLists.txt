@@ -24,8 +24,7 @@ elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "aarch64")
 elseif(${CMAKE_SYSTEM_PROCESSOR} STREQUAL "arm64")
   set(ARCH "aarch64")
 else()
-#  set(ARCH "generic")
-  set(ARCH "x86_64")
+  set(ARCH "generic")
 endif()
 
 # Set per ARCH defaults
@@ -47,6 +46,13 @@ elseif(${ARCH} STREQUAL "generic")
   set(CMAKE_C_FLAGS "-DARCH_NO_ASM")
 else()
   message(FATAL_ERROR "Something got wrong for CPU:" ${CMAKE_SYSTEM_PROCESSOR})
+endif()
+
+# Set compilation flags
+if(DEBUG)
+  set(CMAKE_C_FLAGS "-g")
+else()
+  set(CMAKE_C_FLAGS "-O3")
 endif()
 
 # Common include directories
@@ -103,7 +109,7 @@ add_library(
 
 # Tests
 add_executable(
-  test
+  testsike434
 
   test/p434.cc
   3rd/googletest/src/gtest_main.cc
@@ -114,7 +120,7 @@ include_directories(
 )
 
 target_link_libraries(
-    test
+    testsike434
     sike434sha256
     boringssl_gtest
     pthread)
