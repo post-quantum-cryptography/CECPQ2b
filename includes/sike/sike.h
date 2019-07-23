@@ -30,8 +30,8 @@ extern "C" {
 // SIKE_SS_BYTESZ is the number of bytes in a ciphertext.
 #define SIKE_CT_BYTESZ  (SIKE_PUB_BYTESZ + SIKE_MSG_BYTESZ)
 
-// SIKE_keypair outputs a public and secret key. Internally it uses BN_rand() as
-// an entropy source. In case of success function returns 1, otherwise 0.
+// SIKE_keypair outputs a public and secret key.  In case of success
+// function returns 1, otherwise 0.
  int SIKE_keypair(
     uint8_t out_priv[SIKE_PRV_BYTESZ],
     uint8_t out_pub[SIKE_PUB_BYTESZ]);

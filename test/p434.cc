@@ -195,7 +195,7 @@ TEST(SIKE, Unaligned) {
   EXPECT_EQ(memcmp(shared_key1 + 1, shared_key2 + 1, SIKE_SS_BYTESZ), 0);
 }
 
-TEST(SIKE, CT_FUNCTIONS) {
+TEST(SIKE, CtFunctions) {
     // ct_uint_eq
     EXPECT_EQ(ct_uint_eq(0,1), 0);
     EXPECT_EQ(ct_uint_eq(1,1), 1);
