@@ -30,6 +30,14 @@ version: 2.1
         name: "Compile on Linux ARM64"
         command:
             docker run --rm -v `pwd`:`pwd` -w `pwd` "flowher/c-sike-docker-aarch64" /bin/bash -c "mkdir build && cd build && cmake .. && make"
+    - run:
+        name: "Tests on Linux ARM64"
+        command:
+            docker run --rm -v `pwd`:`pwd` -w `pwd` "flowher/c-sike-docker-aarch64" /bin/bash -c "./build/testsike434"
+    - run:
+        name: "Speed on Linux ARM64"
+        command:
+            docker run --rm -v `pwd`:`pwd` -w `pwd` "flowher/c-sike-docker-aarch64" /bin/bash -c "./build/speedsike434"
 
 jobs:
     amd64:
