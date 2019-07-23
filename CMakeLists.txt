@@ -35,6 +35,7 @@ if(${ARCH} STREQUAL "aarch64")
     asm/fp-aarch64.S
   )
   set(CMAKE_C_FLAGS "-DARCH_AARCH64 -DCPU_64_BIT -DHAS_UINT128")
+  set(CMAKE_CXX_FLAGS "-DARCH_AARCH64 -DCPU_64_BIT -DHAS_UINT128")
 elseif(${ARCH} STREQUAL "x86_64")
   set(
     CRYPTO_ARCH_SOURCES
@@ -42,6 +43,7 @@ elseif(${ARCH} STREQUAL "x86_64")
     asm/fp-x86_64.S
   )
   set(CMAKE_C_FLAGS "-DARCH_X86_64 -DCPU_64_BIT -DHAS_UINT128")
+  set(CMAKE_CXX_FLAGS "-DARCH_X86_64 -DCPU_64_BIT -DHAS_UINT128")
 elseif(${ARCH} STREQUAL "generic")
   set(CMAKE_C_FLAGS "-DARCH_GENERIC")
 else()
@@ -124,3 +126,19 @@ target_link_libraries(
     sike434sha256
     boringssl_gtest
     pthread)
+
+# Speed
+add_executable(
+  speedsike434
+
+  test/speed434.cc
+)
+
+include_directories(
+  src/sike-p434-sha256
+  src/internal
+)
+
+target_link_libraries(
+    speedsike434
+    sike434sha256)
