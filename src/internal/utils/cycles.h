@@ -22,23 +22,10 @@ static inline uint64_t cycles() {
 	return ((uint64_t)lo) | (((uint64_t)hi) << 32);
 #endif
 #if defined(ARCH_AARCH64)
-#if (__ARM_ARCH >= 6)
-	// OZAPTF: optimize
-  uint32_t pmccntr;
-  uint32_t pmuseren;
-  uint32_t pmcntenset;
-  // Read the user mode perf monitor counter access permissions.
-  asm volatile("msr p15, 0, %0, c9, c14, 0" : "=r"(pmuseren));
-  if (pmuseren & 1) {  // Allows reading perfmon counters for user mode code.
-    asm volatile("msr p15, 0, %0, c9, c12, 1" : "=r"(pmcntenset));
-    if (pmcntenset & 0x80000000ul) {  // Is it counting?
-      asm volatile("msr p15, 0, %0, c9, c13, 0" : "=r"(pmccntr));
-      // The counter is set up to count every 64th cycle
-      return (int64_t)(pmccntr) * 64;  // Should optimize to << 6
-    }
-  }
-#endif // __ARM_ARCH >= 6
-#endif
+  uint64_t virtual_timer_value;
+  asm volatile("mrs %0, cntvct_el0" : "=r"(virtual_timer_value));
+  return virtual_timer_value;
+#endif // endif ARCH_AARCH64
 	return ~0;
 }
 
