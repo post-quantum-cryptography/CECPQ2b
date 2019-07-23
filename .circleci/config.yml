@@ -1,0 +1,55 @@
+# Use the latest 2.1 version of CircleCI pipeline processing engine, see https://circleci.com/docs/2.0/configuration-reference/
+version: 2.1
+
+.native_job: &nativejob
+    docker: # run the steps with Docker
+        - image: circleci/buildpack-deps:stretch
+    steps:
+        - checkout
+        - run:
+            name: "Compile on Linux x86-64"
+            command:
+                mkdir build && cd build && cmake .. && make
+        - run:
+            name: "Tests on Linux x86-64"
+            command:
+                ./build/testsike434
+        - run:
+            name: "Speed on Linux x86-64"
+            command:
+                ./build/speedsike434
+
+.emulated_job: &emulatedjob
+  machine: true
+  steps:
+    - checkout
+    - run:
+        name: Install the emulation handlers
+        command: docker run --rm --privileged multiarch/qemu-user-static:register --reset
+    - run:
+        name: "Compile on Linux ARM64"
+        command:
+            docker run --rm -v `pwd`:`pwd` -w `pwd` "flowher/debian-buster-aarch64" /bin/bash -c "mkdir build && cd build && cmake .. && make"
+
+jobs:
+    amd64:
+        <<: *nativejob
+        environment:
+            GOVER: latest
+
+    # Test against older version of golang
+    golang_1_12:
+        <<: *nativejob
+        environment:
+            GOVER: 1.12
+
+    # Test for ARM64
+    arm64:
+        <<: *emulatedjob
+        environment:
+
+workflows:
+    build:
+        jobs:
+            - amd64
+            - arm64
