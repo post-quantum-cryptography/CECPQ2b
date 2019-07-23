@@ -3,7 +3,7 @@ version: 2.1
 
 .native_job: &nativejob
     docker: # run the steps with Docker
-        - image: circleci/buildpack-deps:stretch
+        - image: flowher/c-sike-docker-amd64
     steps:
         - checkout
         - run:
@@ -29,7 +29,7 @@ version: 2.1
     - run:
         name: "Compile on Linux ARM64"
         command:
-            docker run --rm -v `pwd`:`pwd` -w `pwd` "flowher/debian-buster-aarch64" /bin/bash -c "mkdir build && cd build && cmake .. && make"
+            docker run --rm -v `pwd`:`pwd` -w `pwd` "flowher/c-sike-docker-aarch64" /bin/bash -c "mkdir build && cd build && cmake .. && make"
 
 jobs:
     amd64:
