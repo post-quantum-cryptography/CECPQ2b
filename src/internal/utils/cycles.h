@@ -23,7 +23,7 @@ static inline uint64_t cycles() {
 #endif
 #if defined(ARCH_AARCH64)
   uint64_t virtual_timer_value;
-  asm volatile("mrs %0, cntvct_el0" : "=r"(virtual_timer_value));
+  asm volatile("mrs %0, cntpct_el0" : "=r"(virtual_timer_value)); /// CNTPCT_EL0
   return virtual_timer_value;
 #endif // endif ARCH_AARCH64
 	return ~0;
