@@ -409,18 +409,13 @@ static void ex_iso_B(const uint8_t* skB, const uint8_t* pkA, uint8_t* ssB)
 
 int SIKE_keypair(uint8_t out_priv[SIKE_PRV_BYTESZ],
                  uint8_t out_pub[SIKE_PUB_BYTESZ]) {
-  int ret = 0;
-
   // Calculate private key for Alice. Needs to be in range [0, 2^0xFA - 1] and <
   // 253 bits
   randombytes(out_priv, SIKE_PRV_BYTESZ);
   out_priv[31] = (out_priv[31] | 0x01) & 0x03;
 
   gen_iso_B(out_priv, out_pub);
-  ret = 1;
-
-end:
-  return ret;
+  return 1;
 }
 
 void SIKE_encaps(uint8_t out_shared_key[SIKE_SS_BYTESZ],
