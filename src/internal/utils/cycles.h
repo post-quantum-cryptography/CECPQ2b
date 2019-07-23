@@ -21,7 +21,6 @@ static inline uint64_t cycles() {
     asm volatile ("rdtsc\n\t" : "=a" (lo), "=d"(hi));
 	return ((uint64_t)lo) | (((uint64_t)hi) << 32);
 #endif
-/*
 #if defined(ARCH_AARCH64)
 #if (__ARM_ARCH >= 6)
 	// OZAPTF: optimize
@@ -40,7 +39,6 @@ static inline uint64_t cycles() {
   }
 #endif // __ARM_ARCH >= 6
 #endif
-*/
 	return ~0;
 }
 
