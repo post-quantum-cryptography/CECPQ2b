@@ -21,3 +21,7 @@ This is an implementation of SIKE/p434 used for experimentation.
 | x86-64: without BMI2 | SIKE decap    | 155.1          | 219.7          |
 ```
 
+## BoringSSL patch
+
+The ``CECPQ2b_for_BoringSSL_706da620b248615b709e71b36a31312f87a2c692.patch`` patch contains SIKE code that
+can be applied directly on top of BoringSSL. Patch applies cleanly on commit ``706da620b248615b709e71b36a31312f87a2c692``.
