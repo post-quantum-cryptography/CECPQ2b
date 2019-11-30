@@ -15,7 +15,7 @@ open OUT,"| \"$^X\" \"$xlate\" $flavour \"$output\"";
 *STDOUT=*OUT;
 
 $PREFIX="sike";
-$bmi2_adx = 1;
+$bmi2_adx = 0;
 
 $code.=<<___;
 .text
