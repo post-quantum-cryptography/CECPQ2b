@@ -1,0 +1,17 @@
+language: c
+
+os:
+  - osx
+
+
+compiler:
+  - gcc
+  - clang
+
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - ./testsike434

@@ -56,6 +56,10 @@ jobs:
         <<: *emulatedjob
         environment:
 
+    # Test for macOS (o-mach binaries)
+    macOS:
+        <<: *mac_nativejob
+
 workflows:
     build:
         jobs:
