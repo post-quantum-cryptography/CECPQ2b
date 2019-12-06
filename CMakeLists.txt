@@ -30,7 +30,7 @@ endif()
 if(CMAKE_OSX_ARCHITECTURES)
   set(FLAVOUR "macosx")
 else()
-  set(FLAVOUR "linux")
+  set(FLAVOUR "macosx")
 endif()
 
 # Set per ARCH defaults
