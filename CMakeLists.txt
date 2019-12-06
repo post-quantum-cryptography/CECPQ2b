@@ -27,6 +27,12 @@ else()
   set(ARCH "generic")
 endif()
 
+if(CMAKE_OSX_ARCHITECTURES)
+  set(FLAVOUR "macosx")
+else()
+  set(FLAVOUR "linux")
+endif()
+
 # Set per ARCH defaults
 if(${ARCH} STREQUAL "aarch64")
   set(
@@ -72,7 +78,7 @@ target_include_directories(boringssl_gtest PRIVATE 3rd/googletest)
 add_custom_command(
   OUTPUT asm/fp-x86_64.S
   COMMAND ${CMAKE_COMMAND} -E make_directory asm
-  COMMAND ${PERL_EXECUTABLE} ../src/sike-p434-sha256/asm/fp-x86_64.pl -o asm/fp-x86_64.S
+  COMMAND ${PERL_EXECUTABLE} ../src/sike-p434-sha256/asm/fp-x86_64.pl FLAVOUR asm/fp-x86_64.S macosx
   DEPENDS
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/src/sike-p434-sha256/asm/fp-x86_64.pl
@@ -84,7 +90,7 @@ add_custom_command(
 add_custom_command(
   OUTPUT asm/fp-aarch64.S
   COMMAND ${CMAKE_COMMAND} -E make_directory asm
-  COMMAND ${PERL_EXECUTABLE} ../src/sike-p434-sha256/asm/fp-aarch64.pl -o asm/fp-aarch64.S
+  COMMAND ${PERL_EXECUTABLE} ../src/sike-p434-sha256/asm/fp-aarch64.pl FLAVOUR asm/fp-aarch64.S
   DEPENDS
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/src/sike-p434-sha256/asm/fp-aarch64.pl
