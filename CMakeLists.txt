@@ -78,7 +78,7 @@ target_include_directories(boringssl_gtest PRIVATE 3rd/googletest)
 add_custom_command(
   OUTPUT asm/fp-x86_64.S
   COMMAND ${CMAKE_COMMAND} -E make_directory asm
-  COMMAND ${PERL_EXECUTABLE} ../src/sike-p434-sha256/asm/fp-x86_64.pl macosx asm/fp-x86_64.S
+  COMMAND ${PERL_EXECUTABLE} ../src/sike-p434-sha256/asm/fp-x86_64.pl ${FLAVOUR} asm/fp-x86_64.S
   DEPENDS
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/src/sike-p434-sha256/asm/fp-x86_64.pl
@@ -90,7 +90,7 @@ add_custom_command(
 add_custom_command(
   OUTPUT asm/fp-aarch64.S
   COMMAND ${CMAKE_COMMAND} -E make_directory asm
-  COMMAND ${PERL_EXECUTABLE} ../src/sike-p434-sha256/asm/fp-aarch64.pl FLAVOUR asm/fp-aarch64.S
+  COMMAND ${PERL_EXECUTABLE} ../src/sike-p434-sha256/asm/fp-aarch64.pl ${FLAVOUR} asm/fp-aarch64.S
   DEPENDS
   ${PROJECT_SOURCE_DIR}
   ${PROJECT_SOURCE_DIR}/src/sike-p434-sha256/asm/fp-aarch64.pl
