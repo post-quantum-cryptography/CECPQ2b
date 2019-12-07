@@ -3,7 +3,11 @@ language: c
 matrix:
   include:
     - os: osx
-      osx_image: xcode10.3
+      osx_image: xcode10.1
+
+compiler:
+  - clang
+
 
 script:
   - mkdir build
