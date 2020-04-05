@@ -409,10 +409,10 @@ static void ex_iso_B(const uint8_t* skB, const uint8_t* pkA, uint8_t* ssB)
 
 int SIKE_keypair(uint8_t out_priv[SIKE_PRV_BYTESZ],
                  uint8_t out_pub[SIKE_PUB_BYTESZ]) {
-  // Calculate private key for Alice. Needs to be in range [0, 2^0xFA - 1] and <
-  // 253 bits
+  // Calculate private key for Alice. Needs to be in range [0, 2^0xD8 - 1] and <
+  // 216 bits
   randombytes(out_priv, SIKE_PRV_BYTESZ);
-  out_priv[31] = (out_priv[31] | 0x01) & 0x03;
+  out_priv[SIKE_PRV_BYTESZ-1] = (out_priv[SIKE_PRV_BYTESZ-1] & 0x01);
 
   gen_iso_B(out_priv, out_pub);
   return 1;
@@ -424,7 +424,7 @@ void SIKE_encaps(uint8_t out_shared_key[SIKE_SS_BYTESZ],
   // Secret buffer is reused by the function to store some ephemeral
   // secret data. It's size must be maximum of 64,
   // SIKE_MSG_BYTESZ and SIDH_PRV_A_BITSZ in bytes.
-  uint8_t secret[32]; // OZAPTF, why?
+  uint8_t secret[32]; /* 32 - SHA256 output */
   uint8_t j[SIDH_JINV_BYTESZ];
   uint8_t temp[SIKE_MSG_BYTESZ + SIKE_CT_BYTESZ];
   SHA256_CTX ctx;
