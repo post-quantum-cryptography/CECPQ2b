@@ -1,5 +1,4 @@
-# c-sike
-SIKE/p434 in C
+CECPQ2b implementation
 
 This is an implementation of SIKE/p434 used for experimentation.
 
